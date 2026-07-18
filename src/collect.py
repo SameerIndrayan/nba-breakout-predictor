@@ -54,12 +54,6 @@ print(f"\nDone! {len(combined)} total player-seasons across {len(SEASONS)} seaso
 print(f"Columns: {list(combined.columns)}")
 print(combined.head())
 
-<<<<<<< HEAD
-Path("data").mkdir(exist_ok=True)
-=======
-
 Path("data").mkdir(exist_ok=True)
 combined.to_csv("data/player_stats_all_seasons.csv", index=False)
->>>>>>> 2a08231 (read me)
-combined.to_csv("data/player_stats_all_seasons.csv", index=False)
-print(f"Saved to data/player_stats_all_seasons.csv")
+print("Saved to data/player_stats_all_seasons.csv")
