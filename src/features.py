@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 df = pd.read_csv("data/player_stats_all_seasons.csv")
 df = df.sort_values(["PLAYER_ID", "SEASON"]).reset_index(drop=True)
@@ -68,6 +69,7 @@ output_cols = [
     "PTS", "MIN", "GP", "BREAKOUT"
 ]
 
+Path("data").mkdir(exist_ok=True)
 df[output_cols].to_csv("data/labeled_transitions.csv", index=False)
 print(f"\nSaved labeled dataset to data/labeled_transitions.csv")
 

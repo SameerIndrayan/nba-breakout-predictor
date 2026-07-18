@@ -1,6 +1,7 @@
 from nba_api.stats.endpoints import leaguedashplayerstats
 import pandas as pd
 import time
+from pathlib import Path
 
 SEASONS = [
     "2005-06", "2006-07", "2007-08", "2008-09", "2009-10",
@@ -53,5 +54,6 @@ print(f"\nDone! {len(combined)} total player-seasons across {len(SEASONS)} seaso
 print(f"Columns: {list(combined.columns)}")
 print(combined.head())
 
+Path("data").mkdir(exist_ok=True)
 combined.to_csv("data/player_stats_all_seasons.csv", index=False)
 print(f"Saved to data/player_stats_all_seasons.csv")
