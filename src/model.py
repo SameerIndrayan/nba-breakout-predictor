@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 
 df = pd.read_csv("data/labeled_transitions.csv")
 
