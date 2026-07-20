@@ -41,11 +41,7 @@ print(f"Test:  {len(test)} transitions, {test['BREAKOUT'].sum()} breakouts "
       f"({test['BREAKOUT'].mean():.1%})")
 
 feature_cols = [
-    "PREV_AGE", "PREV_GP", "PREV_MIN", "PREV_PTS", "PREV_REB", "PREV_AST",
-    "PREV_FG_PCT", "PREV_FG3_PCT", "PREV_FT_PCT", "PREV_TS_PCT",
-    "PREV_USG_PCT", "PREV_AST_PCT", "PREV_PIE",
-    "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36",
-    "TEAM_CHANGED",
+    "PREV_AGE", "PREV_GP", "PREV_MIN", "PREV_PTS", "PREV_REB", "PREV_AST", "PREV_FG_PCT", "PREV_FG3_PCT", "PREV_FT_PCT", "PREV_TS_PCT", "PREV_USG_PCT", "PREV_AST_PCT", "PREV_PIE", "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36", "PREV_FGA_PER36", "PREV_FG3A_PER36", "PREV_FTA_PER36", "TEAM_CHANGED",
 ]
 
 X_train, y_train = train[feature_cols], train["BREAKOUT"]
