@@ -138,3 +138,52 @@ for name in players_to_check:
         print(rows.to_string(index=False))
         print()
 
+
+seasons = sorted(df["SEASON"].unique())
+test_seasons = [s for s in seasons if s >= "2016-17"]
+
+print("\n--- Walk-forward AUC per fold ---")
+fold_results = []
+for test_season in test_seasons:
+    fold_train = df[df["SEASON"] < test_season]
+    fold_test = df[df["SEASON"] == test_season]
+
+    Xtr, ytr = fold_train[feature_cols], fold_train["BREAKOUT"]
+    Xte, yte = fold_test[feature_cols], fold_test["BREAKOUT"]
+
+    # Need both classes present in the test fold or AUC is undefined
+    if yte.nunique() < 2:
+        print(f"{test_season}: skipped (only one class in test)")
+        continue
+
+    # LR — scaler is fit on THIS fold's training rows only, then applied
+    # to test. Fitting it on all data would leak test info into training.
+    fold_scaler = StandardScaler()
+    Xtr_s = fold_scaler.fit_transform(Xtr)
+    Xte_s = fold_scaler.transform(Xte)
+    fold_lr = LogisticRegression(class_weight="balanced", max_iter=1000)
+    fold_lr.fit(Xtr_s, ytr)
+    lr_auc = roc_auc_score(yte, fold_lr.predict_proba(Xte_s)[:, 1])
+
+    # RF — unscaled, fresh forest each fold
+    fold_rf = RandomForestClassifier(
+        n_estimators=500, max_depth=6, min_samples_leaf=20,
+        class_weight="balanced_subsample", random_state=42, n_jobs=-1,
+    )
+    fold_rf.fit(Xtr, ytr)
+    rf_auc = roc_auc_score(yte, fold_rf.predict_proba(Xte)[:, 1])
+
+    fold_results.append({"season": test_season, "lr_auc": lr_auc, "rf_auc": rf_auc})
+    winner = "LR" if lr_auc > rf_auc else "RF"
+    print(f"{test_season}: LR={lr_auc:.3f}  RF={rf_auc:.3f}  -> {winner}")
+
+
+cv = pd.DataFrame(fold_results)
+gap = cv["lr_auc"] - cv["rf_auc"]          # paired, fold by fold diff
+
+print("\n--- Walk-forward CV summary ---")
+print(f"Folds evaluated:  {len(cv)}")
+print(f"LR mean AUC:      {cv['lr_auc'].mean():.3f}  (std {cv['lr_auc'].std():.3f})")
+print(f"RF mean AUC:      {cv['rf_auc'].mean():.3f}  (std {cv['rf_auc'].std():.3f})")
+print(f"Fold wins — LR: {(gap > 0).sum()}  RF: {(gap < 0).sum()}")
+print(f"Mean paired gap (LR - RF): {gap.mean():+.3f}  (std {gap.std():.3f})")
