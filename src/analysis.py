@@ -5,14 +5,15 @@ Trains logistic regression on ALL eligible historical transitions, then
 scores every eligible player's most recent season to rank breakout
 candidates for the season that hasn't been played yet.
 """
-
+from model_config import FEATURE_COLS, eligible_mask
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
 raw = pd.read_csv("data/player_stats_all_seasons.csv")
-
+feature_cols = FEATURE_COLS
+df = df[eligible_mask(df)].copy()  
 # The most recent season is the launchpad: its stats become the PREV_
 # features for a not-yet-played next season.
 latest_season = sorted(raw["SEASON"].unique())[-1]
@@ -54,7 +55,7 @@ feature_cols = [
     "PREV_AGE", "PREV_GP", "PREV_MIN", "PREV_PTS", "PREV_REB", "PREV_AST",
     "PREV_FG_PCT", "PREV_FG3_PCT", "PREV_FT_PCT", "PREV_TS_PCT",
     "PREV_USG_PCT", "PREV_AST_PCT", "PREV_PIE",
-    "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36",
+    "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36", 
     "TEAM_CHANGED",
 ]
 
@@ -74,22 +75,7 @@ X_hist_scaled = scaler.fit_transform(X_hist)
 
 model = LogisticRegression(class_weight="balanced", max_iter=1000)
 model.fit(X_hist_scaled, y_hist)
-feature_cols = [
-    "PREV_AGE", "PREV_GP", "PREV_MIN", "PREV_PTS", "PREV_REB", "PREV_AST",
-    "PREV_FG_PCT", "PREV_FG3_PCT", "PREV_FT_PCT", "PREV_TS_PCT",
-    "PREV_USG_PCT", "PREV_AST_PCT", "PREV_PIE",
-    "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36",
-    "TEAM_CHANGED",
-]
 
-hist = pd.read_csv("data/labeled_transitions.csv")
-hist = hist[
-    (hist["PREV_AGE"] <= 26) &
-    (hist["PREV_GP"] >= 30) &
-    (hist["PREV_MIN"] >= 12)
-].copy()
-print(f"Training on {len(hist)} eligible historical transitions "
-      f"({hist['BREAKOUT'].sum()} breakouts)")
 
 X_hist, y_hist = hist[feature_cols], hist["BREAKOUT"]
 

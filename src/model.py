@@ -7,13 +7,14 @@ Trains two models on year-over-year player transitions and compares them:
 
 Uses a temporal train/test split so the model never sees future seasons.
 """
-
+from model_config import FEATURE_COLS, eligible_mask
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score
-
+feature_cols = FEATURE_COLS
+df = df[eligible_mask(df)].copy()  
 # ── Load ────────────────────────────────────────────────────────
 df = pd.read_csv("data/labeled_transitions.csv")
 
