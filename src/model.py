@@ -13,37 +13,23 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score
+
 feature_cols = FEATURE_COLS
-df = df[eligible_mask(df)].copy()  
-# ── Load ────────────────────────────────────────────────────────
+
 df = pd.read_csv("data/labeled_transitions.csv")
 
-# ── Eligibility filter ──────────────────────────────────────────
-# Restrict to players who could plausibly break out under our own
-# definition. Without this, the model spends most of its capacity
-# rediscovering the age/GP gates baked into the label, which inflates
-# AUC without adding real predictive signal.
-eligible = (
-    (df["PREV_AGE"] <= 26) &
-    (df["PREV_GP"] >= 30) &
-    (df["PREV_MIN"] >= 12)
-)
-print(f"Eligible pool: {eligible.sum()} of {len(df)} transitions "
-      f"({df.loc[eligible, 'BREAKOUT'].sum()} breakouts)")
-df = df[eligible].copy()
+eligibile = eligible_mask(df)
+print(f"Eligible pool: {eligibile.sum()} of {len(df)} transitions " f"({df.loc[eligibile, 'BREAKOUT'].sum()} breakouts)")
+df = df[eligibile].copy()
 
-# ── Temporal split ──────────────────────────────────────────────
 train = df[df["SEASON"] <= "2018-19"].copy()
 test = df[df["SEASON"] >= "2019-20"].copy()
+
 
 print(f"Train: {len(train)} transitions, {train['BREAKOUT'].sum()} breakouts "
       f"({train['BREAKOUT'].mean():.1%})")
 print(f"Test:  {len(test)} transitions, {test['BREAKOUT'].sum()} breakouts "
       f"({test['BREAKOUT'].mean():.1%})")
-
-feature_cols = [
-    "PREV_AGE", "PREV_GP", "PREV_MIN", "PREV_PTS", "PREV_REB", "PREV_AST", "PREV_FG_PCT", "PREV_FG3_PCT", "PREV_FT_PCT", "PREV_TS_PCT", "PREV_USG_PCT", "PREV_AST_PCT", "PREV_PIE", "PREV_PTS_PER36", "PREV_REB_PER36", "PREV_AST_PER36", "PREV_FGA_PER36", "PREV_FG3A_PER36", "PREV_FTA_PER36", "TEAM_CHANGED",
-]
 
 X_train, y_train = train[feature_cols], train["BREAKOUT"]
 X_test, y_test = test[feature_cols], test["BREAKOUT"]
