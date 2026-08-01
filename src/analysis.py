@@ -53,9 +53,15 @@ model.fit(X_hist_scaled, y_hist)
 # give score
 cur["BREAKOUT_PROB"] = model.predict_proba(scaler.transform(cur[FEATURE_COLS]))[:, 1]
 
+from sklearn.neighbors import NearestNeighbors
+
+nn = NearestNeighbors(n_neighbors=8).fit(X_hist_scaled)
+_, idx = nn.kneighbors(scaler.transform(cur[FEATURE_COLS]))
+cur["COMP_RATE"] = hist["BREAKOUT"].values[idx].mean(axis=1)
+
 board = cur.sort_values("BREAKOUT_PROB", ascending=False)[
     ["PLAYER_NAME", "PREV_AGE", "PREV_MIN", "PREV_PTS",
-     "PREV_USG_PCT", "PREV_TS_PCT", "PREV_PIE", "BREAKOUT_PROB"]
+     "PREV_USG_PCT", "BREAKOUT_PROB", "COMP_RATE"]
 ]
 
 print("\n--- 2026-27 Breakout Candidate Board (top 25) ---")
